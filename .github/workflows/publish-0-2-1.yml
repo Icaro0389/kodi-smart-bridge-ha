@@ -1,0 +1,21 @@
+name: Publish Kodi Smart Bridge Integration v0.2.1
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-0-2-1.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view 'v0.2.1' >/dev/null 2>&1 && exit 0
+          gh release create 'v0.2.1' --target "${GITHUB_SHA}" --title 'Kodi Smart Bridge Integration v0.2.1' --notes 'Adds administrator-only remove favourite WebSocket command. Requires backend v0.2.1.' --latest
