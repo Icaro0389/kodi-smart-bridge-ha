@@ -16,7 +16,7 @@ class BridgeClient:
         self.session = async_get_clientsession(hass)
 
     async def request(self, method: str, path: str, data: dict | None = None):
-        if path not in ("/v1/health", "/v1/roots", "/v1/browse", "/v1/play"):
+        if path not in ("/v1/health", "/v1/roots", "/v1/browse", "/v1/play", "/v1/favourites", "/v1/favourite"):
             raise BridgeUnavailable("Unsupported operation")
         try:
             async with self.session.request(
