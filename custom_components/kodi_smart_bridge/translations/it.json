@@ -1,0 +1,31 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Kodi Smart Bridge",
+        "description": "Inserisci l’indirizzo del server Kodi Smart Bridge e il token. Il token resta su Home Assistant.",
+        "data": {
+          "host": "Indirizzo IPv4 bridge",
+          "port": "Porta",
+          "token": "Token bridge"
+        }
+      },
+      "reconfigure": {
+        "title": "Riconfigura Kodi Smart Bridge",
+        "description": "Inserisci indirizzo, porta e nuovo token del bridge. La connessione viene verificata prima del salvataggio.",
+        "data": {
+          "host": "Indirizzo IPv4",
+          "port": "Porta",
+          "token": "Token di autenticazione"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Connessione o autenticazione non riuscita",
+      "already_configured": "Questo bridge è già configurato"
+    },
+    "abort": {
+      "already_configured": "Questo bridge è già configurato"
+    }
+  }
+}

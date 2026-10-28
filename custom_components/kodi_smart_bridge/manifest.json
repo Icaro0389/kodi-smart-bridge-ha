@@ -1,0 +1,9 @@
+{
+  "domain": "kodi_smart_bridge",
+  "name": "Kodi Smart Bridge",
+  "version": "0.1.2",
+  "config_flow": true,
+  "iot_class": "local_push",
+  "requirements": [],
+  "documentation": "https://github.com/Icaro0389/kodi-smart-bridge-ha"
+}
