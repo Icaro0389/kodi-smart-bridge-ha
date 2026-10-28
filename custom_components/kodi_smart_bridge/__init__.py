@@ -24,6 +24,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     websocket_api.async_register_command(hass, ws_roots)
     websocket_api.async_register_command(hass, ws_browse)
     websocket_api.async_register_command(hass, ws_play)
+    websocket_api.async_register_command(hass, ws_favourites)
+    websocket_api.async_register_command(hass, ws_favourite_add)
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
@@ -80,6 +82,41 @@ async def ws_play(hass, connection, msg):
         return
     try:
         result = await get_bridge(hass).request("POST", "/v1/play", {"id":msg["item_id"]})
+        connection.send_result(msg["id"], result)
+    except BridgeUnavailable as exc:
+        connection.send_error(msg["id"], "bridge_error", str(exc))
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "kodi_smart_bridge/favourites",
+})
+@websocket_api.async_response
+async def ws_favourites(hass, connection, msg):
+    if not connection.user.is_admin:
+        connection.send_error(msg["id"], "unauthorized", "Administrator required")
+        return
+    try:
+        result = await get_bridge(hass).request("GET", "/v1/favourites")
+        connection.send_result(msg["id"], result)
+    except BridgeUnavailable as exc:
+        connection.send_error(msg["id"], "bridge_error", str(exc))
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "kodi_smart_bridge/favourite_add",
+    vol.Required("item_id"): vol.All(str, vol.Length(min=1, max=128)),
+    vol.Required("title"): vol.All(str, vol.Length(min=1, max=250)),
+    vol.Optional("poster"): vol.Any(None, vol.All(str, vol.Length(max=1024))),
+})
+@websocket_api.async_response
+async def ws_favourite_add(hass, connection, msg):
+    if not connection.user.is_admin:
+        connection.send_error(msg["id"], "unauthorized", "Administrator required")
+        return
+    data = {"id": msg["item_id"], "title": msg["title"]}
+    if "poster" in msg:
+        data["poster"] = msg["poster"]
+    try:
+        result = await get_bridge(hass).request("POST", "/v1/favourite", data)
         connection.send_result(msg["id"], result)
     except BridgeUnavailable as exc:
         connection.send_error(msg["id"], "bridge_error", str(exc))
