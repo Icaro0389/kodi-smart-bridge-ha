@@ -27,6 +27,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     websocket_api.async_register_command(hass, ws_favourites)
     websocket_api.async_register_command(hass, ws_favourite_add)
     websocket_api.async_register_command(hass, ws_favourite_remove)
+    websocket_api.async_register_command(hass, ws_youtube_search)
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
@@ -134,6 +135,22 @@ async def ws_favourite_remove(hass, connection, msg):
     try:
         result = await get_bridge(hass).request(
             "POST", "/v1/favourite/remove", {"id": msg["item_id"]})
+        connection.send_result(msg["id"], result)
+    except BridgeUnavailable as exc:
+        connection.send_error(msg["id"], "bridge_error", str(exc))
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "kodi_smart_bridge/youtube_search",
+    vol.Required("search"): vol.All(str, vol.Length(min=2, max=100)),
+})
+@websocket_api.async_response
+async def ws_youtube_search(hass, connection, msg):
+    if not connection.user.is_admin:
+        connection.send_error(msg["id"], "unauthorized", "Administrator required")
+        return
+    try:
+        result = await get_bridge(hass).request(
+            "POST", "/v1/youtube/search", {"search": msg["search"]})
         connection.send_result(msg["id"], result)
     except BridgeUnavailable as exc:
         connection.send_error(msg["id"], "bridge_error", str(exc))
